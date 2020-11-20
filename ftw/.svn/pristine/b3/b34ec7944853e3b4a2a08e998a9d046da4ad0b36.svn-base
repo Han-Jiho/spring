@@ -1,0 +1,39 @@
+package com.ftw.member.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class MemberVO {
+	
+	// 회원 번호
+	public int no;
+	// 회원 등급
+	public int grade;
+	// 회원 상태 - 1: 정상, 2: 정지, 3: 탈퇴
+	public int condition;
+	// 회원 아이디
+	public String id;
+	// 회원 비밀번호
+	public String pw; 
+	// 회원 별명
+	public String nickname; 
+	// 회원 이메일
+	public String email;
+	public String email1;
+	public String email2;
+	// 회원 선호 지역(최대 3개)
+	public String local1;
+	public String local2;
+	public String local3;
+	public String sido1;
+	public String sido2;
+	public String sido3;
+	public String gugun1;
+	public String gugun2;
+	public String gugun3;
+	// 회원 가입 날짜
+	public Date join_date;
+	
+}

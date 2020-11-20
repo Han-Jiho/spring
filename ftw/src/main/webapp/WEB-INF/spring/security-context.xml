@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 객체 저장소 -->
+	<!-- 권한오류 -->
+	<bean id="customAccessDenied"
+		class="com.ftw.security.CustomAccessDeniedHandler" />
+	<!-- 비밀번호 암호화 -->
+	<bean id="bcryptPasswordEncoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+	<!-- 로그인 -->
+	<bean id="customLoginSuccess"
+		class="com.ftw.security.CustomLoginSuccessHandler" />
+	<!-- 유저 정보 서비스 -->
+ 	<bean id="customUserDetailsService"
+		class="com.ftw.security.CustomUserDetailsService"></bean>
+
+	<!-- 오류 페이지만 이용할 경우 -->
+	<!-- <security:http auto-config="true" use-expressions="true"> -->
+	<security:http>
+
+		<!-- 권한 설정 페이지 -->
+		<!-- main -->
+		<security:intercept-url
+			pattern="/main/index.do" access="permitAll" />
+		<!-- check 폴더 -->
+		<security:intercept-url
+			pattern="/check/email_check.do" access="permitAll" />
+		<security:intercept-url
+			pattern="/check/email_send.do" access="permitAll" />
+		<security:intercept-url
+			pattern="/check/email_conf.do" access="permitAll" />
+		<!-- member 폴더 -->
+		<security:intercept-url
+			pattern="/member/welcome.do" access="permitAll" />
+		<security:intercept-url
+			pattern="/member/join.do" access="permitAll" />
+		<security:intercept-url pattern="/member/my.do"
+			access="hasAnyRole('ROLE_ADMIN', 'ROLE_MEMBER')" />
+		<security:intercept-url pattern="/member/pw_check.do"
+			access="hasAnyRole('ROLE_ADMIN', 'ROLE_MEMBER')" />
+		<security:intercept-url pattern="/member/change.do"
+			access="hasAnyRole('ROLE_ADMIN', 'ROLE_MEMBER')" />
+		<security:intercept-url pattern="/member/exit.do"
+			access="hasAnyRole('ROLE_ADMIN', 'ROLE_MEMBER')" />
+		<security:intercept-url
+			pattern="/member/list.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/member/view.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/member/stop.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/member/clear.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/member/cnt.do" access="hasRole('ROLE_ADMIN')" />
+			
+		<!-- weekly 관련 -->	
+		<security:intercept-url
+			pattern="/weekly/write.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/weekly/update.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/weekly/delete.do" access="hasRole('ROLE_ADMIN')" />
+		
+		<!-- traffic 관련 -->
+		<security:intercept-url
+			pattern="/traffic/write.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/traffic/update.do" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url
+			pattern="/traffic/delete.do" access="hasRole('ROLE_ADMIN')" />
+
+		<!-- 권한 오류 페이지 -->
+		<!-- <security:access-denied-handler error-page="/error/access.do"/> -->
+		<!-- 권한 오류 핸들러 -->
+		<security:access-denied-handler
+			ref="customAccessDenied" />
+
+		<!-- 로그인 -->
+		<!-- <security:form-login/> -->
+		<security:form-login login-page="/member/login.do"
+			authentication-success-handler-ref="customLoginSuccess"/>
+		<!-- <security:form-login login-page="/member/login.do" login-processing-url="/member/login.do"/> -->
+		<!-- <security:form-login login-page="/member/login.do"/> -->
+		<!-- 로그아웃 -->
+		<security:logout logout-url="/member/logout.do"
+			invalidate-session="true" />
+
+		<security:csrf disabled="true" />
+	</security:http>
+
+	<security:authentication-manager>
+
+		<!-- 권한 설정 -->
+ 		<security:authentication-provider user-service-ref="customUserDetailsService">
+		<!-- <security:authentication-provider> -->
+
+			<!-- DB연동 로그인 -->
+			<!-- <security:jdbc-user-service data-source-ref="dataSource"/> -->
+	 		<!-- <security:jdbc-user-service
+				data-source-ref="dataSource"
+				users-by-username-query="select userid, userpw, enabled from member where userid = ?"
+				authorities-by-username-query="select userid, auth from member_auth where userid = ?" /> -->
+
+			<!-- 비밀번호 암호화 -->
+			<security:password-encoder
+				ref="bcryptPasswordEncoder" />
+
+			<!-- 로그인 -->
+			<!-- <security:user-service> <security:user name="member" password="{noop}member" 
+				authorities="ROLE_MEMBER"/> <security:user name="admin" password="{noop}admin" 
+				authorities="ROLE_MEMBER, ROLE_ADMIN"/> </security:user-service> -->
+
+		</security:authentication-provider>
+
+	</security:authentication-manager>
+
+</beans>

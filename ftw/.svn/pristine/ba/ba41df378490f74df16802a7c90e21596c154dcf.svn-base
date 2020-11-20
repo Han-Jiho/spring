@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ftw.ptp.mapper.PtpMapper">
+	
+	<select id="list" resultType="com.ftw.ptp.vo.PtpVO">
+		select * from(
+			select rownum rnum, no, title, writer, writeDate, hit
+			from(
+		select no, title, writer, writeDate, hit
+		from ptp
+		<include refid="search" />
+		order by no desc
+			)
+		)
+		where rnum between #{startRow} and #{endRow}
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(*) from ptp
+	</select>
+	
+	<!-- 전체글의 갯수를 구한다. : select -->
+ <select id="total" resultType="java.lang.Integer">
+  select count(*) from ptp
+  <!-- 조건이 있는 경우 조건에 맞는 데이터의 전체 갯수를 구해야 한다. -->
+  <include refid="search" />
+ </select>
+ 
+ <!-- 반복되어 지거나 복잡한 경우 따로 선언을 하고 가져다 쓸 수 있도록 정의해 놓은 것 -->
+ <sql id="search">
+  <if test="word !=null and word != ''.toString">
+   where ( 2 = 1
+   <!-- 2湲???댁긽??寃쎌슦 : String 痍④툒,
+     ??湲?먯씤 寃쎌슦:char 痍④툒 => toString()瑜??댁슜?댁꽌 臾몄옄?대줈 留뚮벉-->
+   <if test="key == 't'.toString()">
+    <!-- concat(臾몄옄?? 臾몄옄?? : 2媛쒕쭔 ?곌껐,
+      "||" : 臾몄옄???댁뼱 遺숈씠???곗궛??-->
+       or title like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'c'.toString()">
+          or content like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'w'.toString()">
+          or writer like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'tc'.toString()">
+          or title like '%'||#{word}||'%'
+          or content like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'tw'.toString()">
+          or title like '%'||#{word}||'%'
+          or writer like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'cw'.toString()">
+          or content like '%'||#{word}||'%'
+          or writer like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'all'">
+          or title like '%'||#{word}||'%'
+          or content like '%'||#{word}||'%'
+          or writer like '%'||#{word}||'%'
+   </if>
+   )
+  </if>
+
+</sql>
+
+	
+	<insert id="write">
+		insert into ptp(no,title,content,writer,pw) 
+		values(ptp_seq.nextval, #{title}, #{content}, #{writer}, #{pw})	
+	</insert>
+	
+	<select id="view" resultType="com.ftw.ptp.vo.PtpVO">
+		select * from ptp
+		where no=#{no}
+	</select>
+	
+	<update id="increse">
+		update ptp set hit = hit + 1 where no = #{no}
+	</update>
+	
+	<update id="update">
+		update ptp set title = #{title}, 
+		content = #{content},writer=#{writer} where no = #{no} and pw = #{pw}
+	</update>
+	
+	<delete id="delete">
+		delete from ptp where no=#{no} and pw=#{pw}
+	</delete>
+</mapper>

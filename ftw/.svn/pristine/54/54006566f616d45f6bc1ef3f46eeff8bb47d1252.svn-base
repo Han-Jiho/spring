@@ -1,0 +1,128 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="panel panel-info">
+					<div class="panel-heading">일반 게시판</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<%-- <c:forEach items="${boardList }" var="vo">
+					<li class="list-group-item dataRow">
+						<a href="/board/view.do?inc=1&no=${vo.no }" id="viewA"> 
+							${vo.no }. ${vo.title } - ${vo.writer }(
+								<fmt:formatDate value="${vo.writeDate }" pattern="yyyy.MM.dd"/>)
+						</a>
+						<span class="badge">${vo.hit }</span>
+					</li>
+				</c:forEach> --%>
+						</ul>
+					</div>
+				</div>
+				<div align="right" class="listBtn">
+					<a href="#" class="btn btn-default">더보기</a>
+				</div>
+			</div>
+			<div class="col-md-3"></div>
+			<div class="col-md-3">
+				<div class="panel panel-info">
+					<div class="panel-heading">일반 게시판</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<%-- <c:forEach items="${boardList }" var="vo">
+					<li class="list-group-item dataRow">
+						<a href="/board/view.do?inc=1&no=${vo.no }" id="viewA"> 
+							${vo.no }. ${vo.title } - ${vo.writer }(
+								<fmt:formatDate value="${vo.writeDate }" pattern="yyyy.MM.dd"/>)
+						</a>
+						<span class="badge">${vo.hit }</span>
+					</li>
+				</c:forEach> --%>
+						</ul>
+					</div>
+				</div>
+				<div align="right" class="listBtn">
+					<a href="#" class="btn btn-default">더보기</a>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-3">
+				<div class="panel panel-info">
+					<div class="panel-heading">일반 게시판</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<%-- <c:forEach items="${boardList }" var="vo">
+					<li class="list-group-item dataRow">
+						<a href="/board/view.do?inc=1&no=${vo.no }" id="viewA"> 
+							${vo.no }. ${vo.title } - ${vo.writer }(
+								<fmt:formatDate value="${vo.writeDate }" pattern="yyyy.MM.dd"/>)
+						</a>
+						<span class="badge">${vo.hit }</span>
+					</li>
+				</c:forEach> --%>
+						</ul>
+					</div>
+				</div>
+				<div align="right" class="listBtn">
+					<a href="#" class="btn btn-default">더보기</a>
+				</div>
+			</div>
+			<div class="col-md-3"></div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="panel panel-info">
+					<div class="panel-heading">일반 게시판</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<%-- <c:forEach items="${boardList }" var="vo">
+					<li class="list-group-item dataRow">
+						<a href="/board/view.do?inc=1&no=${vo.no }" id="viewA"> 
+							${vo.no }. ${vo.title } - ${vo.writer }(
+								<fmt:formatDate value="${vo.writeDate }" pattern="yyyy.MM.dd"/>)
+						</a>
+						<span class="badge">${vo.hit }</span>
+					</li>
+				</c:forEach> --%>
+						</ul>
+					</div>
+				</div>
+				<div align="right" class="listBtn">
+					<a href="#" class="btn btn-default">더보기</a>
+				</div>
+			</div>
+			<div class="col-md-3"></div>
+			<div class="col-md-3">
+				<div class="panel panel-info">
+					<div class="panel-heading">일반 게시판</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<%-- <c:forEach items="${boardList }" var="vo">
+					<li class="list-group-item dataRow">
+						<a href="/board/view.do?inc=1&no=${vo.no }" id="viewA"> 
+							${vo.no }. ${vo.title } - ${vo.writer }(
+								<fmt:formatDate value="${vo.writeDate }" pattern="yyyy.MM.dd"/>)
+						</a>
+						<span class="badge">${vo.hit }</span>
+					</li>
+				</c:forEach> --%>
+						</ul>
+					</div>
+				</div>
+				<div align="right" class="listBtn">
+					<a href="#" class="btn btn-default">더보기</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

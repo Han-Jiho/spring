@@ -1,0 +1,73 @@
+package com.ftw.check.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ftw.mail.service.EMailService;
+import com.ftw.member.service.MemberService;
+
+import lombok.extern.log4j.Log4j;
+
+@RestController
+@Log4j
+public class CheckController {
+
+	@Qualifier("ms")
+	@Autowired
+	private MemberService memberService;
+	
+	@Autowired
+	private EMailService emailService;
+		
+	@GetMapping("/check/id_check.do")
+	public int id_check(String id) {
+		log.info("check.id:" + id);
+		if(memberService.view(id) != null) {
+			System.out.println("con.service.id 있음");
+			return 0;
+		}
+		else {
+			System.out.println("con.service.id 없음");
+			return 1;
+		}
+	}
+	
+	@GetMapping("/check/email_check.do")
+	public int email_check(String email) {
+		log.info("check.email:" + email);
+		if(memberService.dup_email(email) == 1) {
+			System.out.println("con.service.email 있음");
+			return 0;
+		}
+		else {
+			System.out.println("con.service.email 없음");
+			return 1;
+		}
+	}
+	
+	@GetMapping("/check/email_send.do")
+	public int email_send(String email, HttpServletRequest request) {
+//		System.out.println("emailSend.email" + email);
+		log.info("check.email" + email);
+		HttpSession session = request.getSession();
+//		System.out.println("세션 생성");
+		emailService.mailSend(session, email);
+//		System.out.println("서비스 실행");
+		return 1;
+	}
+	
+	@PostMapping("/check/email_conf.do")
+	public boolean email_conf(HttpServletRequest request, String email, String inputCode) {
+		HttpSession session = request.getSession();
+		boolean result = emailService.email_conf(session, email, Integer.parseInt(inputCode));
+		
+		return result;
+	}
+	
+}

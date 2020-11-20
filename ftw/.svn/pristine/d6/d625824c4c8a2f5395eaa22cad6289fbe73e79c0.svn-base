@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ftw.member.mapper.MemberMapper">
+
+	<!-- 권한 -->
+	<resultMap type="com.ftw.member.vo.MemberVO" id="memberMap">
+		<id property="userid" column="userid" />
+		<result property="no" column="no" />
+		<result property="userid" column="userid" />
+		<result property="userpw" column="userpw" />
+		<result property="nickname" column="nickname" />
+		<result property="email" column="email" />
+		<result property="local1" column="local1" />
+		<result property="local2" column="local2" />
+		<result property="local3" column="local3" />
+		<result property="enabled" column="enabled" />
+		<result property="join_date" column="join_date" />
+		<collection property="authList" resultMap="authMap" />
+	</resultMap>
+	<resultMap type="com.ftw.member.vo.AuthVO" id="authMap">
+		<id property="userid" column="userid" />
+		<result property="userid" column="userid" />
+		<result property="auth" column="auth" />
+	</resultMap>
+
+	<!-- 로그인 정보 -->
+	<select id="read" resultMap="memberMap">
+		select mem.userid, userpw, enabled,
+		nickname, auth
+		from member mem
+		left outer join member_auth auth on
+		mem.userid = auth.userid
+		where mem.userid = #{userid}
+	</select>
+
+	<!-- 아이디 찾기 -->
+	<select id="findUserid" resultType="String">
+		select userid
+		from member
+		where email = #{email}
+	</select>
+
+	<!-- 비밀번호 찾기 -->
+	<select id="findUserpw" resultType="String">
+		select userpw
+		from member
+		where userid = #{userid} and email = #{email}
+	</select>
+
+	<!-- 검색 조건 -->
+	<sql id="search">
+		<if test="word !=null and word != ''.toString">
+			where ( 2 = 1
+			<!-- 2글자 이상인 경우 : String 취급, 한 글자인 경우:char 취급 => toString()를 이용해서 문자열로 
+				만듬 -->
+			<if test="key == 'n'.toString()">
+				<!-- concat(문자열, 문자열) : 2개만 연결, "||" : 문자열 이어 붙이는 연산자 -->
+				or no like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'i'.toString()">
+				or userid like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'e'.toString()">
+				or email like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'c'.toString()">
+				or enabled like '%'||#{word}||'%'
+			</if>
+			)
+		</if>
+	</sql>
+
+	<!-- 회원 리스트 -->
+	<select id="list" resultType="com.ftw.member.vo.MemberVO">
+		select * from(
+		select rownum rnum, no, userid, email, enabled,
+		join_date from(
+		select no, userid, email, enabled, join_date
+		from member
+		<include refid="search" />
+		order by no desc
+		)
+		) where rnum between #{startRow} and #{endRow}
+	</select>
+	<select id="getRow" resultType="Integer">
+		select count(*) from member
+		<include refid="search" />
+	</select>
+
+	<!-- 회원정보 & 내 정보 -->
+	<select id="view" resultType="com.ftw.member.vo.MemberVO">
+		select
+		userid, userpw, no, nickname,
+		email, local1, local2, local3, join_date,
+		enabled
+		from
+		member
+		where
+		userid
+		= #{userid}
+	</select>
+
+	<!-- 회원 가입 -->
+	<insert id="join">
+		insert into member(no, userid, userpw, nickname,
+		email, local1, local2, local3)
+		values(member_seq.nextval, #{userid},
+		#{userpw}, #{nickname}, #{email}, #{local1}, #{local2}, #{local3})
+	</insert>
+	<insert id="auth">
+		insert into member_auth values(#{userid},
+		'ROLE_MEMBER')
+	</insert>
+
+	<!-- 이메일 중복 확인 -->
+	<select id="dup_email" resultType="com.ftw.member.vo.MemberVO">
+		select email from member where
+		email = #{email}
+	</select>
+
+	<!-- 회원 정보 변경 -->
+	<update id="update">
+		update member set
+		nickname = #{nickname},
+		local1 =
+		#{local1},
+		local2 = #{local2},
+		local3 = #{local3}
+		where userid =
+		#{userid}
+	</update>
+
+	<!-- 회원 정지 -->
+	<update id="stop">
+		update member set enabled = '0'
+		where userid =
+		#{userid}
+	</update>
+
+	<!-- 회원 정지 해제 -->
+	<update id="clear">
+		update member set enabled = '1'
+		where userid =
+		#{userid}
+	</update>
+
+	<!-- 비밀번호 확인 -->
+	<select id="check" resultType="String">
+		select userpw from member
+		where
+		userid = #{userid}
+	</select>
+
+	<!-- 비밀번호 변경 -->
+	<update id="change">
+		update member set userpw = #{userpw}
+		where userid =
+		#{userid}
+	</update>
+
+	<!-- 회원 탈퇴 -->
+	<delete id="delete">
+		delete from member_auth where userid = #{userid}
+	</delete>
+	<delete id="exit">
+		delete from member where userid = #{userid}
+	</delete>
+
+	<!-- 회원 통계 -->
+	<select id="cnt" resultType="com.ftw.member.vo.CntVO">
+		SELECT local1, local2, local3
+		FROM
+		member
+	</select>
+
+</mapper>

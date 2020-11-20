@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+  http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- 객체 선언: 자동 생성 -->
+	<!-- bean: 자동 생성 -->
+	<!-- DB 연결 : 자바단이 아닌 xml에서 처리-> 시간 단축 -->
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+		<!-- log 적용 -->
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+		<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@106.243.249.73:9321:orcl"/>
+		<!-- 바로 오라클 로 가는 거 기본 타입 -->
+		<!-- <property name="driverClassName"
+			value="oracle.jdbc.driver.OracleDriver" />
+		<property name="jdbcUrl"
+			value="jdbc:oracle:thin:@localhost:1521:xe" />
+		<property name="jdbcUrl"
+			value="jdbc:oracle:thin:@192.168.0.12:1521:xe" /> -->
+		<property name="username" value="team3" />
+		<property name="password" value="team3" />
+<!--
+	Oracle 서버 -> sys 계정으로 접속 후 팀 계정 생성 / 권한 부여
+	NW - jdbc:oracle:thin:@302-SVN:1521:orcl
+	IP - jdbc:oracle:thin:@192.168.56.159:1521:orcl
+	외부 - jdbc:oracle:thin:@106.243.249.72:9321:orcl
+
+	3팀 SVN : OK
+	NW - https://302-SVN/svn/20200407/project/spring/6p
+	IP - https://192.168.56.159/svn/20200407/project/spring/6p
+	외부 - https://106.243.249.72:9322/svn/20200407/project/spring/6p
+	
+	create user ftw_imsi identified by "1234";
+	grant resource,connect to ftw_imsi;
+	
+	create sequence board_seq;
+	create table board(
+		no number primary key,
+		title varchar(20),
+		content varchar(200),
+		writer varchar(20),
+		writeDate date default sysdate,
+		hit number default 0);
+	insert into board(no,title,content,writer)
+		values(board_seq.nextval,'title1','content1','writer1');
+
+--> 
+		<!-- <property name="driverClassName" -->
+		<!-- value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" /> -->
+		<!-- DB 접속 정보를 설치한 것에 맞게 변경해 줘야 한다. -> 만약에 11g xe를 설치한 경우 -->
+<!-- 		<property name="jdbcUrl"  -->
+<!-- 			value="jdbc:log4jdbc:oracle:thin:@localhost:1521:xe" />  -->
+<!-- 			<property name="username" value="java" />  -->
+<!-- 			<property name="password" value="java" /> -->
+		<!-- <property name="jdbcUrl" -->
+		<!-- value="jdbc:log4jdbc:oracle:thin:@402-oracle:1521:orcl" /> -->
+	</bean>
+
+	<!-- 서버가 시작되면 Connection을 만들어서 DBCP에 넣어둔다. 속도↑ -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+		destroy-method="close">
+		<constructor-arg ref="hikariConfig" />
+	</bean>
+
+	<!-- Mybaits - dao 코드 자동 생성 -->
+	<!-- mapper Interface(메서드이름) - mapper xml(sql) -->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- dao(persitence) 자동으로 만들어 주기 위한 위치 -->
+	<mybatis-spring:scan base-package="com.ftw" />
+	<context:component-scan
+		base-package="com.ftw">
+	</context:component-scan>
+	
+	<!-- email 보내기 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com" />
+        <property name="port" value="587" />
+        <property name="username" value="flowtrafficweather@gmail.com" />
+        <property name="password" value="ftw_6p_team33" />
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+</beans>

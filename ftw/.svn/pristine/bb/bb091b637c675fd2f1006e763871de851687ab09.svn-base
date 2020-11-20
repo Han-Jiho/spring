@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ftw.member.mapper.MemberMapper">
+
+	<!-- 로그인 -->
+	<select id="login" resultType="com.ftw.member.vo.MemberVO">
+		select * from member where id = #{id} and pw = #{pw}
+	</select>
+	
+	<!-- 검색 조건 -->
+	<sql id="search">
+		<if test="word !=null and word != ''.toString">
+			where ( 2 = 1
+			<!-- 2글자 이상인 경우 : String 취급, 한 글자인 경우:char 취급 => toString()를 이용해서 문자열로 
+				만듬 -->
+			<if test="key == 'n'.toString()">
+				<!-- concat(문자열, 문자열) : 2개만 연결, "||" : 문자열 이어 붙이는 연산자 -->
+				or no like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'i'.toString()">
+				or id like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'e'.toString()">
+				or email like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'c'.toString()">
+				or condition like '%'||#{word}||'%'
+			</if>
+			)
+		</if>
+	</sql>
+	
+	<!-- 회원 리스트 -->
+	<select id="list" resultType="com.ftw.member.vo.MemberVO">
+		select * from(
+			select rownum rnum, no, id, email, condition, join_date from(
+				select no, id, email, condition, join_date 
+				from member
+				<include refid="search"/>
+				order by no desc
+			)
+		) where rnum between #{startRow} and #{endRow}
+	</select>
+	<select id="getRow" resultType="Integer">
+		select count(*) from member
+		<include refid="search"/>
+	</select>
+	
+	<!-- 회원 정보 & 내 정보 -->
+	<select id="view" resultType="com.ftw.member.vo.MemberVO">
+		select * from member where id = #{id}
+	</select> 
+
+	<!-- 회원 가입 -->
+	<insert id="join">
+		insert into member(no, id, pw, nickname, email, local1, local2, local3)
+		values(member_seq.nextval, #{id}, #{pw}, #{nickname}, #{email}, #{local1}, #{local2}, #{local3})
+	</insert>
+	
+	<!-- 이메일 중복 확인 -->
+	<select id="dup_email" resultType="com.ftw.member.vo.MemberVO">
+		select * from member where email = #{email}
+	</select>
+	
+	<!-- 회원 정보 변경 -->
+	<update id="update">
+		update member set 
+			nickname = #{nickname},
+			local1 = #{local1},
+			local2 = #{local2},
+			local3 = #{local3}
+		where id = #{id}
+	</update>
+	
+	<!-- 회원 정지 -->
+	<update id="stop">
+		update member set condition = 2
+		where id = #{id}
+	</update>
+	
+	<!-- 회원 정지 해제 -->
+	<update id="clear">
+		update member set condition = 1
+		where id = #{id}
+	</update>
+	
+	<!-- 비밀번호 확인 -->
+	<select id="check" resultType="com.ftw.member.vo.MemberVO">
+		select id, pw from member where id = #{id} and pw = #{pw}
+	</select>
+	
+	<!-- 비밀번호 변경 -->
+	<update id="change">
+		update member set pw = #{pw}
+		where id = #{id}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<delete id="exit">
+		delete from member where id = #{id}
+	</delete>
+	
+</mapper>

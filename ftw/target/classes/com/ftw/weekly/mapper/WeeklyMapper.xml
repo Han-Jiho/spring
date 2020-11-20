@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 1. com.ftw.weekly.mapper.WeeklyMapper 인터페이스 선언
+		  - src/main/java
+	 2. root-context.xml mybatis:scan 태그로 기본 패키지 지정
+	 3. com.ftw.weekly.mapper.WeeklyMapper.xml 실행 작성
+	 	  - src/main/resources -->
+
+<mapper namespace="com.ftw.weekly.mapper.WeeklyMapper">
+
+<!-- 게시판 리스트 : 검색 적용 -->
+<select id="list" resultType="com.ftw.weekly.vo.WeeklyVO">
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+select *
+from(
+	select rownum rnum, basedate, writeDate, hit
+	from(
+		select basedate, writeDate, hit
+		from weeklyt
+		<include refid="search" />
+		order by writeDate desc
+	)
+)
+where rnum between #{startRow} and #{endRow}
+</select>
+<!-- 검색에 사용되는 조건 처리문 -->
+<sql id="search">
+  <if test="word !=null and word != ''.toString">
+   where ( 2 = 1
+   <!-- 2글자 이상인 경우 : String 취급,
+     한 글자인 경우:char 취급 => toString()를 이용해서 문자열로 만듬-->
+   <if test="key == 't'.toString()">
+    <!-- concat(문자열, 문자열) : 2개만 연결,
+      "||" : 문자열 이어 붙이는 연산자 -->
+       or title like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'c'.toString()">
+          or content like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'w'.toString()">
+          or writer like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'tc'.toString()">
+          or title like '%'||#{word}||'%'
+          or content like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'tw'.toString()">
+          or title like '%'||#{word}||'%'
+          or writer like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'cw'.toString()">
+          or content like '%'||#{word}||'%'
+          or writer like '%'||#{word}||'%'
+   </if>
+   <if test="key == 'all'">
+          or title like '%'||#{word}||'%'
+          or content like '%'||#{word}||'%'
+          or writer like '%'||#{word}||'%'
+   </if>
+   )
+  </if>
+
+</sql>
+<!-- 전체 데이터 가져오기 : 검색 적용 -->
+<select id="getRow" resultType="java.lang.Integer">
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+select count(*)
+from weeklyt
+<!-- <include refid="search" /> -->
+</select>
+
+<insert id="write">
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+<![CDATA[
+insert into weeklyt(basedate, monmin, monmax, tuemin, tuemax, wedmin, wedmax, thumin, thumax, frimin, frimax, satmin, satmax, sunmin, sunmax, MONAR, MONPR, TUEAR, TUEPR, WEDAR, WEDPR, 
+THUAR, THUPR, FRIAR, FRIPR, SATAR, SATPR, SUNAR, SUNPR, MONAW, MONPW, TUEAW, TUEPW, WEDAW, WEDPW, THUAW, THUPW, FRIAW, FRIPW, SATAW, SATPW, SUNAW, SUNPW)
+values(#{baseDate,jdbcType=VARCHAR}, #{monMin}, #{monMax}, #{tueMin}, #{tueMax}, #{wedMin}, #{wedMax}, #{thuMin}, #{thuMax}, #{friMin}, #{friMax}, #{satMin}, #{satMax}, #{sunMin}, #{sunMax}, #{monar}, #{monpr}, #{tuear}, #{tuepr}, #{wedar}, #{wedpr}, 
+#{thuar}, #{thupr}, #{friar}, #{fripr}, #{satar}, #{satpr}, #{sunar}, #{sunpr}, #{monaw}, #{monpw}, #{tueaw}, #{tuepw}, #{wedaw}, #{wedpw}, #{thuaw}, #{thupw}, #{friaw}, #{fripw}, #{sataw}, #{satpw}, #{sunaw}, #{sunpw}
+)
+]]>
+</insert>
+
+<select id="view" resultType="com.ftw.weekly.vo.WeeklyVO">
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+
+select basedate, writedate, monmin, monmax, tuemin, tuemax, wedmin, wedmax, 
+thumin, thumax, frimin, frimax, satmin, satmax, sunmin, sunmax, 
+monar, monpr, tuear, tuepr, wedar, wedpr, 
+thuar, thupr, friar, fripr, satar, satpr, sunar, sunpr, 
+monaw, monpw, tueaw, tuepw, wedaw, wedpw, thuaw, thupw, 
+friaw, fripw, sataw, satpw, sunaw, sunpw, hit
+from weeklyt 
+where basedate = #{baseDate}
+
+</select>
+
+<!-- 조회수 1 증가 -->
+<update id="increase" >
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+<![CDATA[
+update weeklyt
+set hit = hit + 1
+where basedate = #{baseDate}
+]]>
+</update>
+
+<!-- 게시판 글수정 -->
+<update id="update" >
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+<![CDATA[
+update weeklyt
+set monmin = #{monMin}, monmax = #{monMax}, tuemin = #{tueMin}, tuemax = #{tueMax}, wedmin = #{wedMin}, wedmax = #{wedMax}, thumin = #{thuMin}, frimax = #{friMax}, frimin = #{friMin}, satmax = #{satMax}, satmin = #{satMin}, sunmax = #{sunMax}, sunmin = #{sunMin}, 
+monar = #{monar}, monpr = #{monpr}, tuear = #{tuear}, tuepr = #{tuepr}, wedar = #{wedar}, wedpr = #{wedpr}, thuar = #{thuar}, thupr = #{thupr}, friar = #{friar}, fripr = #{fripr}, satar = #{satar}, satpr = #{satpr}, sunar = #{sunar}, sunpr = #{sunpr}, 
+monaw = #{monaw}, monpw = #{monpw}, tueaw = #{tueaw}, tuepw = #{tuepw}, wedaw = #{wedaw}, wedpw = #{wedpw}, thuaw = #{thuaw}, thupw = #{thupw}, friaw = #{friaw}, fripw = #{fripw}, sataw = #{sataw}, satpw = #{satpw}, sunaw = #{sunaw}, sunpw = #{sunpw}
+where basedate = #{baseDate}
+]]>
+</update>
+
+<!-- 게시판 글삭제 -->
+<delete id="delete" >
+<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+<![CDATA[
+delete from weeklyt
+where baseDate = #{baseDate}
+]]>
+</delete>
+
+
+</mapper>

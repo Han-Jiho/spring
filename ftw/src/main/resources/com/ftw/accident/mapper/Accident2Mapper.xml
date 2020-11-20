@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 1. com.ftw.accident.mapper.AccidentMapper 인터페이스 선언 - src/main/java 2. 
+	root-context.xml mybatis:scan 태그로 기본 패키지 지정 3. com.ftw.accident.mapper.AccidentMapper.xml 
+	실행 작성 - src/main/resources -->
+
+<mapper namespace="com.ftw.accident.mapper.Accident2Mapper">
+
+	<!-- 게시판 리스트 : 검색 적용 -->
+<!-- 	<select id="list" resultType="com.ftw.accident.vo.Accident2VO"> -->
+<!-- 		<![CDATA[ -->
+<!-- 		select count(*) cntByHour, hour, acType -->
+<!-- 		from accident2 -->
+<!-- 		group by hour, acType -->
+<!-- 		order by hour asc -->
+<!-- 		]]> -->
+<!-- 	</select> -->
+		
+	<select id="list1" resultType="com.ftw.accident.vo.Accident2VO">
+		<!-- <![CDATA[ 이곳에 있는 것은 mybatis가 처리하지 않고 그대로 넘긴다. ]]> -->
+		<![CDATA[
+		select count(*) cntByHour, hour, acType
+		from accident2
+		where acType = 0
+		group by hour, acType
+		order by hour asc
+		]]>
+	</select>
+	<select id="list2" resultType="com.ftw.accident.vo.Accident2VO">
+		<![CDATA[
+		select count(*) cntByHour, hour, acType
+		from accident2
+		where acType = 1
+		group by hour, acType
+		order by hour asc
+		]]>
+	</select>
+	<select id="list3" resultType="com.ftw.accident.vo.Accident2VO">
+		<![CDATA[
+		select count(*) cntByHour, hour, acType
+		from accident2
+		where acType = 2
+		group by hour, acType
+		order by hour asc
+		]]>
+	</select>
+
+</mapper>

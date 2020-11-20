@@ -1,0 +1,244 @@
+package com.ftw.member.controller;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.ftw.member.service.MemberService;
+import com.ftw.member.vo.MemberVO;
+
+import lombok.extern.log4j.Log4j;
+import net.webjjang.util.PageObject;
+
+@Controller
+@RequestMapping("/member/*")
+@Log4j
+public class MemberController {
+
+	@Qualifier("ms")
+	@Autowired
+	private MemberService service;
+	
+	private final String MODULE = "member/";
+	
+	// 로그인
+	@GetMapping("/login.do")
+	public String LoginForm() {
+		
+		return MODULE + "login";
+	}
+	@PostMapping("/login.do")
+	public String login(HttpSession session, MemberVO vo, Model model) {
+		
+		log.info("login.vo:" + vo);
+		MemberVO login = new MemberVO();
+		login = service.login(vo);
+		log.info("login.login:" + login);
+		if(login != null && login.getCondition() == 1) {
+			session.setAttribute("login", login);
+			return "redirect:/main/index.do";
+		}
+		else {
+			model.addAttribute("error", "로그인 실패. 아이디나 비밀번호를 확인해주세요.");
+			return "redirect:login.do";
+		}
+	}
+	// 로그아웃
+	@GetMapping("/logout.do")
+	public String logout(HttpSession session) {
+		service.logout(session);
+		return "redirect:/main/index.do";
+	}
+	
+	// 회원 가입
+	@GetMapping("/join.do")
+	public String joinForm() {
+		log.info("joinForm()");
+		
+		return MODULE + "join";
+	}
+	@PostMapping("/join.do")
+	public String join(MemberVO vo) {
+		
+		System.out.println("con.join().vo:" + vo);
+		log.info(vo);
+		service.join(vo);		
+		return "redirect:welcome.do";
+	}
+	@GetMapping("/welcome.do")
+	public String welecome() {
+		
+		return MODULE + "welcome";
+	}
+
+	// 회원 리스트
+	@GetMapping("/list.do")
+	public String list(Model model, PageObject pageObject) {
+		
+		model.addAttribute("list", service.list(pageObject));
+		model.addAttribute("pageObject", pageObject);
+		log.info("admin only");
+		
+		return MODULE + "list";
+	}
+	
+	// 회원 정보
+	@GetMapping("/view.do")
+	public String view(Model model, PageObject pageObject, String id) {
+		
+		model.addAttribute("vo", service.view(id));
+		model.addAttribute("pageObject", pageObject);
+		
+		return MODULE + "view";
+	}
+	
+	// 내 정보
+	@GetMapping("/my.do")
+	public String my(Model model, String id) {
+		
+		log.info(service.view(id));
+		MemberVO vo = new MemberVO();
+		vo = service.view(id);
+		
+		// 이메일 분리
+		String email = vo.getEmail();
+		String[] emailL = email.split("@");
+		String email1 = emailL[0];
+		String email2 = emailL[1];
+		log.info("email1:" + email1);
+		log.info("email2:" + email2);
+		vo.setEmail1(email1);
+		vo.setEmail2(email2);
+		
+		// 지역 분리
+		String local1 = vo.getLocal1();
+		String local2 = vo.getLocal2();
+		String local3 = vo.getLocal3();
+		String[] local1L = local1.split(" ");
+		String[] local2L = local2.split(" ");
+		String[] local3L = local3.split(" ");
+		String sido1 = local1L[0];
+		String sido2 = local2L[0];
+		String sido3 = local3L[0];
+		String gugun1 = local1L[1];
+		String gugun2 = local2L[1];
+		String gugun3 = local3L[1];
+		log.info("sido1 + gugun1" + sido1+ "+" + gugun1);
+		log.info("sido2 + gugun2" + sido2+ "+" + gugun2);
+		log.info("sido3 + gugun3" + sido3+ "+" + gugun3);
+		vo.setSido1(sido1);
+		vo.setSido2(sido2);
+		vo.setSido3(sido3);
+		vo.setGugun1(gugun1);
+		vo.setGugun1(gugun2);
+		vo.setGugun1(gugun3);
+		
+		model.addAttribute("vo", vo);
+		
+		return MODULE + "my";
+	}	
+
+	// 내 정보 수정
+	@PostMapping("/update.do")
+	public String update(MemberVO vo, Model model) {
+		
+		log.info("update.vo:" + vo);
+		if (service.update(vo) == true) {
+			model.addAttribute("success", "정보 변경 완료");
+		}
+		
+		return "redirect:my.do?id=" + vo.getId();
+	}
+	
+	// 비밀번호 확인
+	@GetMapping("/pw_check.do")
+	public String pw_checkForm() {
+		
+		return MODULE + "pw_check";
+	}
+	@PostMapping("/pw_check.do")
+	public String pw_check(String pw, HttpSession session, int chk, Model model, 
+			String id) {
+		
+		log.info("pw_check.id:" + id);
+		MemberVO login = new MemberVO();
+		login.setId(id);
+		login.setPw(pw);		
+		log.info("pw_check.loginId:" + id);
+		log.info("pw_check.inputPw:" + pw);
+		MemberVO vo = service.check(login);
+		log.info("pw_check.vo:" + vo);
+		
+		if(vo != null) {
+			// 비밀번호 변경
+			if(chk == 1) {
+				return "redirect:change.do?id=" + id;
+			}
+			// 회원 탈퇴
+			else if(chk == 2) {
+				service.exit(id, session);;
+				return "redirect:thanks.do?";
+			}
+		}
+		else {
+			model.addAttribute("msg", "비밀번호가 틀립니다. 다시 입력해주세요");
+			return "redirect:pw_check.do?chk=" + chk + "&id=" + id;
+		}
+		return "";
+	}
+	
+	// 비밀번호 변경
+	@GetMapping("/change.do")
+	public String changeForm() {
+		
+		return MODULE + "change";
+	}
+	@PostMapping("/change.do")
+	public String change(HttpSession session, String pw, String id , 
+			HttpServletResponse response) {
+		
+		MemberVO vo = new MemberVO();
+		vo.setId(id);
+		vo.setPw(pw);
+		log.info("change.vo:" + vo);
+		
+		if(service.change(vo) == true) {
+			return "redirect:my.do?id=" + id;
+		}
+		else {
+			return "redirect:change.do?id=" + id;
+		}
+	}
+	
+	// 회원 정지
+	@GetMapping("/stop.do")
+	public String stop(String id) {
+		
+		service.stop(id);
+		
+		return "redirect:list.do";
+	}
+	
+	// 회원 정지 해제
+	@GetMapping("/clear.do")
+	public String clear(String id) {
+		
+		service.clear(id);
+		
+		return "redirect:view.do?id=" + id;
+	}
+	
+	// 회원 탈퇴 완료
+	@GetMapping("/thanks.do")
+	public String thanks() {
+		
+		return MODULE + "thanks";
+	}
+}

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ftw.weather.mapper.WeatherMapper">
+	
+	<select id="list" resultType="com.ftw.weather.vo.WeatherVO">
+		select * from(
+			select rownum rnum, no, title, writer, writeDate, hit
+			from(
+		select no, title, writer, writeDate, hit
+		from weatherboard
+		order by no desc
+			)
+		)
+		where rnum between #{startRow} and #{endRow}
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(*) from weatherboard
+	</select>
+	
+	<!-- 전체글의 갯수를 구한다. : select -->
+ <select id="getRow" resultType="java.lang.Integer">
+  select count(*) from weatherboard
+  <!-- 조건이 있는 경우 조건에 맞는 데이터의 전체 갯수를 구해야 한다. -->
+ </select>
+ 
+	<!-- 검색에 사용되는 조건 처리문 -->
+	<sql id="search">
+		<if test="word !=null and word != ''.toString">
+			where ( 2 = 1
+			<!-- 2글자 이상인 경우 : String 취급, 한 글자인 경우:char 취급 => toString()를 이용해서 문자열로 
+				만듬 -->
+			<if test="key == 't'.toString()">
+				<!-- concat(문자열, 문자열) : 2개만 연결, "||" : 문자열 이어 붙이는 연산자 -->
+				or title like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'c'.toString()">
+				or content like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'w'.toString()">
+				or writer like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'tc'.toString()">
+				or title like '%'||#{word}||'%'
+				or content like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'tw'.toString()">
+				or title like '%'||#{word}||'%'
+				or writer like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'cw'.toString()">
+				or content like '%'||#{word}||'%'
+				or writer like '%'||#{word}||'%'
+			</if>
+			<if test="key == 'all'">
+				or title like '%'||#{word}||'%'
+				or content like '%'||#{word}||'%'
+				or writer like '%'||#{word}||'%'
+			</if>
+			)
+		</if>
+	</sql>
+	
+	<insert id="write">
+		insert into weatherboard(no,title,content,writer,pw) 
+		values(ptp_seq.nextval, #{title}, #{content}, #{writer}, #{pw})	
+	</insert>
+	
+	<select id="view" resultType="com.ftw.weather.vo.WeatherVO">
+		select * from weatherboard
+		where no=#{no}
+	</select>
+	
+	<update id="increase">
+		update weatherboard set hit = hit + 1 where no = #{no}
+	</update>
+	
+	<update id="update">
+		update weatherboard set title = #{title}, 
+		content = #{content},writer=#{writer} where no = #{no} and pw = #{pw}
+	</update>
+	
+	<delete id="delete">
+		delete from weatherboard where no=#{no} and pw=#{pw}
+	</delete>
+</mapper>
